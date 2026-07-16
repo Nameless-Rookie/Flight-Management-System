@@ -1,0 +1,628 @@
+================================================================================
+    FLIGHT MANAGEMENT SYSTEM — OOP CONCEPTS SUMMARY
+    Object-Oriented Design & Programming (OODP)
+    Concepts: Encapsulation | Abstraction | Inheritance | Polymorphism
+================================================================================
+
+
+TABLE OF CONTENTS
+─────────────────
+  1. Project Overview
+  2. Class Hierarchy / UML Overview
+  3. ENCAPSULATION — Detailed Explanation with Code Examples
+  4. ABSTRACTION — Detailed Explanation with Code Examples
+  5. INHERITANCE — Detailed Explanation with Code Examples
+  6. POLYMORPHISM — Detailed Explanation with Code Examples
+  7. How All Four Pillars Work Together
+  8. Summary Table
+
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+The Flight Management System is a console-based C++ application that manages
+passengers, flights, seats, and bookings for an Indian domestic airline network.
+
+The system was developed in PHASES, each introducing a new OOP concept:
+
+  Phase 1 (FlightManagement.cpp)       → Basic Classes & Objects
+  Phase 2 (FlightManagement_Phase2.cpp)→ Encapsulation (private, getters/setters)
+  Phase 3 (FlightManagement_Phase3.cpp)→ Arrays of Objects, Collections, CRUD
+  Phase 4 (FlightManagement_Phase4.cpp)→ Inheritance (Base/Derived Classes)
+  Final   (FlightManagement_Final.cpp) → All OOP Concepts Combined
+
+The FINAL version (FlightManagement_Final.cpp) is the main deliverable that
+integrates ALL four pillars of OOP.
+
+Core Classes:
+  • Passenger    — Stores traveler information (ID, name, phone, passport)
+  • Flight       — Stores flight details (ID, airline, route, seats)
+  • Seat         — Stores seat info (number, class, price, availability)
+  • Booking      — BASE class for all booking types
+  • FlightBooking— DERIVED from Booking (for flight tickets)
+  • SeatUpgrade  — DERIVED from Booking (for seat class upgrades)
+
+
+================================================================================
+2. CLASS HIERARCHY / UML OVERVIEW
+================================================================================
+
+                    ┌──────────────┐
+                    │   Passenger  │
+                    │──────────────│
+                    │- id          │
+                    │- name        │
+                    │- phone       │
+                    │- passport    │
+                    │──────────────│
+                    │+ getId()     │
+                    │+ setId()     │
+                    │+ input()     │
+                    │+ display()   │
+                    └──────────────┘
+
+                    ┌──────────────┐
+                    │   Flight     │
+                    │──────────────│
+                    │- id          │
+                    │- airline     │
+                    │- origin      │
+                    │- dest        │
+                    │- availSeats  │
+                    │──────────────│
+                    │+ bookSeat()  │
+                    │+ cancelSeat()│
+                    │+ display()   │
+                    └──────────────┘
+
+                    ┌──────────────┐
+                    │    Seat      │
+                    │──────────────│
+                    │- no          │
+                    │- cls         │
+                    │- price       │
+                    │- avail       │
+                    │──────────────│
+                    │+ markBooked()│
+                    │+ markAvail() │
+                    │+ display()   │
+                    └──────────────┘
+
+   INHERITANCE HIERARCHY:
+
+                    ┌──────────────────┐
+                    │     Booking      │  ◄── BASE CLASS
+                    │──────────────────│
+                    │# bId             │  (# = protected)
+                    │# pId             │
+                    │# pName           │
+                    │# date            │
+                    │# type            │
+                    │# amount          │
+                    │──────────────────│
+                    │+ display()       │
+                    │+ getBId()        │
+                    │+ getAmount()     │
+                    └────────┬─────────┘
+                             │
+              ┌──────────────┴──────────────┐
+              │                             │
+    ┌─────────▼──────────┐      ┌───────────▼────────┐
+    │  FlightBooking     │      │  SeatUpgrade       │
+    │  (Derived)         │      │  (Derived)         │
+    │────────────────────│      │────────────────────│
+    │- airline           │      │- seatNo            │
+    │- origin            │      │- flightId          │
+    │- dest              │      │- fromCls           │
+    │- depTime           │      │- toCls             │
+    │- seatNum           │      │────────────────────│
+    │────────────────────│      │+ display()  ←OVERRIDE│
+    │+ display() ←OVERRIDE│      │+ displayRow()      │
+    │+ displayRow()      │      │+ input()           │
+    │+ input()           │      └────────────────────┘
+    └────────────────────┘
+
+
+================================================================================
+3. ENCAPSULATION — Detailed Explanation with Code Examples
+================================================================================
+
+WHAT IS ENCAPSULATION?
+  Encapsulation is the bundling of data (attributes) and the methods that
+  operate on that data into a single unit (class), while restricting direct
+  access to some of the object's components. It is implemented using:
+    • private members  — Cannot be accessed from outside the class
+    • public getters   — Read-only access to private data
+    • public setters   — Controlled write access WITH VALIDATION
+
+WHY IS IT IMPORTANT?
+  - Prevents invalid data from entering the system
+  - Hides internal implementation details
+  - Allows changing internals without breaking external code
+
+────────────────────────────────────────────────────────────────────────────────
+EXAMPLE 1: Passenger Class — Data Hiding & Validation
+────────────────────────────────────────────────────────────────────────────────
+
+  class Passenger {
+  private:                               // ← DATA IS HIDDEN
+      int id;
+      string name, phone, passport;
+
+  public:                                // ← CONTROLLED ACCESS
+      // GETTER — Read-only access
+      int getId() { return id; }
+      string getName() { return name; }
+
+      // SETTER — Write access WITH VALIDATION
+      bool setPhone(string p) {
+          if (p.length() == 10) {        // ← VALIDATION RULE
+              for (int i = 0; i < 10; i++)
+                  if (p[i] < '0' || p[i] > '9') {
+                      cout << "  [!] Digits only.\n";
+                      return false;
+                  }
+              phone = p;
+              return true;
+          }
+          cout << "  [!] Must be 10 digits.\n";
+          return false;
+      }
+
+      bool setPassport(string pp) {
+          if (pp.length() >= 6 && pp.length() <= 12) { // ← VALIDATION
+              passport = pp;
+              return true;
+          }
+          cout << "  [!] 6-12 chars.\n";
+          return false;
+      }
+  };
+
+  HOW IT WORKS:
+  • The attributes 'id', 'name', 'phone', 'passport' are declared PRIVATE
+  • Nobody can write `p.phone = "abc"` directly — that would compile-error
+  • Instead, they MUST call `p.setPhone("9876543210")`
+  • setPhone() validates that the phone is exactly 10 digits
+  • setPassport() validates the passport is 6-12 characters
+  • If validation fails, the data is NOT modified (protecting integrity)
+
+────────────────────────────────────────────────────────────────────────────────
+EXAMPLE 2: Flight Class — Seat Booking Logic Encapsulated
+────────────────────────────────────────────────────────────────────────────────
+
+  class Flight {
+  private:
+      int id, totalSeats, availSeats;     // ← HIDDEN from outside
+      string airline, origin, dest;
+
+  public:
+      void setSeats(int s) {
+          if (s >= 0 && s <= 500) {       // ← Validates range
+              availSeats = s;
+              totalSeats = s;
+          } else {
+              cout << "  [!] 0-500.\n";
+          }
+      }
+
+      bool bookSeat() {                  // ← Encapsulated business logic
+          if (availSeats > 0) {
+              availSeats--;              // ← Safely decrements
+              return true;
+          }
+          cout << "  [!] No seats.\n";
+          return false;
+      }
+
+      void cancelSeat() {
+          if (availSeats < totalSeats)   // ← Prevents exceeding total
+              availSeats++;
+      }
+  };
+
+  HOW IT WORKS:
+  • 'availSeats' is PRIVATE — outside code cannot set it to -5 or 9999
+  • bookSeat() checks availability BEFORE decrementing
+  • cancelSeat() checks that we don't exceed totalSeats
+  • The business rule "seats cannot go below 0 or above total" is ENFORCED
+    by the class itself — not left to external code
+
+────────────────────────────────────────────────────────────────────────────────
+EXAMPLE 3: Seat Class — State Management
+────────────────────────────────────────────────────────────────────────────────
+
+  class Seat {
+  private:
+      int no;
+      string cls;
+      float price;
+      bool avail;                        // ← Internal state
+
+  public:
+      void setCls(string c) {
+          if (c == "Economy" || c == "Business" || c == "First")
+              cls = c;
+          else
+              cout << "  [!] Economy/Business/First.\n";  // ← Rejects invalid
+      }
+
+      void markBooked() {
+          if (avail) avail = false;      // ← Only books if available
+          else cout << "  [!] Already booked.\n";
+      }
+
+      void markAvail() { avail = true; }
+  };
+
+  HOW IT WORKS:
+  • setCls() only accepts three valid values: "Economy", "Business", "First"
+  • markBooked() prevents double-booking the same seat
+  • The internal state 'avail' is managed through controlled methods
+
+
+================================================================================
+4. ABSTRACTION — Detailed Explanation with Code Examples
+================================================================================
+
+WHAT IS ABSTRACTION?
+  Abstraction means hiding the complex implementation details and showing only
+  the essential features to the user. The user interacts with a simplified
+  interface without needing to know HOW things work internally.
+
+  In our code, abstraction is achieved through:
+    • Public methods that provide a simple interface
+    • Private implementation details hidden from users
+    • Each class represents a REAL-WORLD ENTITY (Passenger, Flight, Booking)
+
+────────────────────────────────────────────────────────────────────────────────
+EXAMPLE 1: Flight.bookSeat() — Abstract Interface
+────────────────────────────────────────────────────────────────────────────────
+
+  // WHAT THE USER SEES (Simple Interface):
+  flights[fi].bookSeat();    // Just call one method to book!
+
+  // WHAT HAPPENS INTERNALLY (Hidden Complexity):
+  bool bookSeat() {
+      if (availSeats > 0) {           // Step 1: Check availability
+          availSeats--;                // Step 2: Decrement counter
+          return true;                 // Step 3: Return success
+      }
+      cout << "  [!] No seats.\n";    // Step 4: Handle error
+      return false;
+  }
+
+  WHY THIS IS ABSTRACTION:
+  • The caller (bookFlight function) doesn't need to know about seat counting
+  • It just calls bookSeat() and checks if it returned true/false
+  • The internal logic of checking seats, decrementing, error handling is HIDDEN
+  • If we later change how seats are tracked (e.g., using a linked list), the
+    external code doesn't need to change at all
+
+────────────────────────────────────────────────────────────────────────────────
+EXAMPLE 2: Passenger.input() — Abstracting User Input
+────────────────────────────────────────────────────────────────────────────────
+
+  // WHAT THE USER (programmer) WRITES:
+  passengers[pCnt].input();    // One call does everything
+
+  // WHAT HAPPENS INSIDE:
+  void input() {
+      int i; string n, p, pp;
+      cout << "  Enter Passenger ID   : "; cin >> i;   setId(i);
+      cout << "  Enter Name           : "; cin.ignore(); getline(cin, n); setName(n);
+      cout << "  Enter Phone (10 dig) : "; cin >> p;   setPhone(p);
+      cout << "  Enter Passport No    : "; cin >> pp;  setPassport(pp);
+  }
+
+  WHY THIS IS ABSTRACTION:
+  • The addPassenger() function just calls passengers[pCnt].input()
+  • It doesn't need to know the order of prompts, or how validation works
+  • All the messy details of cin, getline, validation are ABSTRACTED away
+
+────────────────────────────────────────────────────────────────────────────────
+EXAMPLE 3: Booking.display() — Abstract Display Interface
+────────────────────────────────────────────────────────────────────────────────
+
+  // In viewAllBookings(), the code simply calls:
+  fBookings[i].display();     // For flight tickets
+  uBookings[i].display();     // For seat upgrades
+
+  // Each class handles its OWN display format internally.
+  // The caller doesn't care HOW each booking type is displayed.
+  // FlightBooking shows: airline, route, departure, seat number
+  // SeatUpgrade shows: flight ID, seat number, from/to class
+
+  WHY THIS IS ABSTRACTION:
+  • Same method name display() works for different booking types
+  • Each type knows how to display ITSELF
+  • The main code doesn't need to handle formatting for each type
+
+
+================================================================================
+5. INHERITANCE — Detailed Explanation with Code Examples
+================================================================================
+
+WHAT IS INHERITANCE?
+  Inheritance allows a class (derived/child) to inherit properties and methods
+  from another class (base/parent). This promotes:
+    • Code Reuse — Don't repeat common attributes/methods
+    • Hierarchical Classification — "IS-A" relationships
+    • Extensibility — Add new types without modifying existing code
+
+────────────────────────────────────────────────────────────────────────────────
+EXAMPLE 1: Booking → FlightBooking (IS-A Relationship)
+────────────────────────────────────────────────────────────────────────────────
+
+  // BASE CLASS — Contains common booking attributes
+  class Booking {
+  protected:                        // ← 'protected' allows derived access
+      int bId, pId;                 // Common: booking ID, passenger ID
+      string pName, date, type;     // Common: name, date, type
+      float amount;                 // Common: total amount
+
+  public:
+      int getBId() { return bId; }
+      void setBId(int i) { if (i > 0) bId = i; }
+      void setAmount(float a) { if (a >= 0) amount = a; }
+
+      void display() {             // Base display
+          cout << "  Booking #" << bId << " | " << type
+               << " | " << pName << " | Rs." << amount << endl;
+      }
+  };
+
+  // DERIVED CLASS — Inherits ALL of Booking + adds flight-specific data
+  class FlightBooking : public Booking {
+  private:
+      string airline, origin, dest, depTime;  // ← Flight-specific data
+      int seatNum, flightId;                  // ← Flight-specific data
+
+  public:
+      FlightBooking() {
+          type = "Flight";          // ← Sets the inherited 'type' field
+      }
+
+      void setAirline(string a) { airline = a; }
+      void setOrigin(string o)  { origin = o; }
+      void setDest(string d)    { dest = d; }
+
+      // OVERRIDDEN display() — shows flight-specific ticket
+      void display() {
+          cout << "  +--------------------------------------------+" << endl;
+          cout << "  |            ** FLIGHT TICKET **             |" << endl;
+          cout << "  +--------------------------------------------+" << endl;
+          cout << "  | Booking ID  : " << bId << endl;     // ← INHERITED
+          cout << "  | Passenger   : " << pName << endl;    // ← INHERITED
+          cout << "  | Airline     : " << airline << endl;  // ← OWN
+          cout << "  | Route       : " << origin << " -> " << dest << endl;
+          cout << "  | Seat No     : " << seatNum << endl;  // ← OWN
+          cout << "  | TOTAL       : Rs." << amount << endl;// ← INHERITED
+          cout << "  +--------------------------------------------+" << endl;
+      }
+  };
+
+  WHAT IS INHERITED:
+  • bId, pId, pName, date, type, amount  — All from Booking (no re-declaration)
+  • getBId(), setBId(), setAmount()       — Methods from Booking
+  • FlightBooking ADDS: airline, origin, dest, depTime, seatNum, flightId
+
+  CODE REUSE EXAMPLE:
+  In the bookFlight() function:
+    fBookings[fbCnt].setBId(nextBId);    // ← Calling INHERITED method
+    fBookings[fbCnt].setPId(pid);        // ← Calling INHERITED method
+    fBookings[fbCnt].setAirline(..);     // ← Calling OWN method
+
+────────────────────────────────────────────────────────────────────────────────
+EXAMPLE 2: Booking → SeatUpgrade (Second Derived Class)
+────────────────────────────────────────────────────────────────────────────────
+
+  class SeatUpgrade : public Booking {    // ← Also inherits from Booking
+  private:
+      int seatNo, flightId;
+      string fromCls, toCls;             // ← Upgrade-specific: from/to class
+
+  public:
+      SeatUpgrade() {
+          type = "Upgrade";              // ← Sets inherited 'type'
+      }
+
+      // OVERRIDDEN display() — shows upgrade receipt format
+      void display() {
+          cout << "  +--------------------------------------------+" << endl;
+          cout << "  |         ** SEAT UPGRADE RECEIPT **         |" << endl;
+          cout << "  +--------------------------------------------+" << endl;
+          cout << "  | Booking ID  : " << bId << endl;      // ← INHERITED
+          cout << "  | Passenger   : " << pName << endl;     // ← INHERITED
+          cout << "  | Flight ID   : " << flightId << endl;  // ← OWN
+          cout << "  | Seat No     : " << seatNo << endl;    // ← OWN
+          cout << "  | Upgrade     : " << fromCls << " -> " << toCls << endl;
+          cout << "  | FEE         : Rs." << amount << endl; // ← INHERITED
+          cout << "  +--------------------------------------------+" << endl;
+      }
+  };
+
+  WHY TWO DERIVED CLASSES?
+  • FlightBooking and SeatUpgrade BOTH need booking ID, passenger ID, date,
+    amount — so they INHERIT these from Booking (no code duplication!)
+  • But they each have DIFFERENT additional data:
+    - FlightBooking has: airline, route, seat number
+    - SeatUpgrade has: from class, to class, upgrade fee
+  • They each display() DIFFERENTLY — one shows a ticket, other shows a receipt
+
+
+================================================================================
+6. POLYMORPHISM — Detailed Explanation with Code Examples
+================================================================================
+
+WHAT IS POLYMORPHISM?
+  Polymorphism means "many forms." It allows the same method name to behave
+  differently based on the object that calls it. In our code:
+    • Method Overriding — Derived classes redefine display() from Booking
+    • Same interface, different behavior
+
+────────────────────────────────────────────────────────────────────────────────
+EXAMPLE 1: Method Overriding — display() has THREE different behaviors
+────────────────────────────────────────────────────────────────────────────────
+
+  The method display() exists in THREE classes, each with DIFFERENT behavior:
+
+  1) Booking::display()          → Simple one-line summary
+     Output: "Booking #1001 | Flight | John | Rs.4500"
+
+  2) FlightBooking::display()    → Full flight ticket format with borders
+     Output:
+       +--------------------------------------------+
+       |            ** FLIGHT TICKET **             |
+       +--------------------------------------------+
+       | Booking ID  : 1001                         |
+       | Passenger   : John                         |
+       | Airline     : Air India                    |
+       | Route       : Delhi -> Mumbai              |
+       | Seat No     : 12                           |
+       | TOTAL       : Rs.4500                      |
+       +--------------------------------------------+
+
+  3) SeatUpgrade::display()      → Upgrade receipt format
+     Output:
+       +--------------------------------------------+
+       |         ** SEAT UPGRADE RECEIPT **         |
+       +--------------------------------------------+
+       | Booking ID  : 1002                         |
+       | Upgrade     : Economy -> Business          |
+       | FEE         : Rs.3000                      |
+       +--------------------------------------------+
+
+  SAME METHOD NAME → THREE DIFFERENT OUTPUTS
+  This is polymorphism in action!
+
+────────────────────────────────────────────────────────────────────────────────
+EXAMPLE 2: Polymorphism in viewAllBookings()
+────────────────────────────────────────────────────────────────────────────────
+
+  void viewAllBookings() {
+      // Flight bookings — calls FlightBooking::display()
+      for (int i = 0; i < fbCnt; i++)
+          fBookings[i].display();        // ← FlightBooking version runs
+
+      // Upgrade bookings — calls SeatUpgrade::display()
+      for (int i = 0; i < ubCnt; i++)
+          uBookings[i].display();        // ← SeatUpgrade version runs
+  }
+
+  WHAT HAPPENS:
+  • Both lines call .display() — SAME method name
+  • But fBookings[i] is a FlightBooking object → prints FLIGHT TICKET format
+  • And uBookings[i] is a SeatUpgrade object  → prints UPGRADE RECEIPT format
+  • The METHOD BEHAVES DIFFERENTLY based on the OBJECT TYPE
+
+────────────────────────────────────────────────────────────────────────────────
+EXAMPLE 3: displayRow() — Another Polymorphic Method
+────────────────────────────────────────────────────────────────────────────────
+
+  FlightBooking has displayRow():
+    // Shows: BkID | PID | Name | Airline | Departure | Seat | Amount
+    void displayRow() {
+        cout << "  | " << bId << "| " << pId << "| " << pName
+             << "| " << airline << "| " << depTime
+             << "| " << seatNum << "| Rs." << amount << endl;
+    }
+
+  SeatUpgrade has displayRow():
+    // Shows: BkID | PID | Name | Flight | Seat | Upgrade | Amount
+    void displayRow() {
+        string u = fromCls + "->" + toCls;
+        cout << "  | " << bId << "| " << pId << "| " << pName
+             << "| F" << flightId << "| S" << seatNo
+             << "| " << u << "| Rs." << amount << endl;
+    }
+
+  SAME METHOD NAME, DIFFERENT COLUMNS/DATA — polymorphism at table level
+
+
+================================================================================
+7. HOW ALL FOUR PILLARS WORK TOGETHER
+================================================================================
+
+Let's trace through a COMPLETE BOOKING FLOW to see all 4 concepts in action:
+
+  STEP 1 — User selects "Book Flight" from menu
+
+  STEP 2 — ENCAPSULATION in action:
+    cout << "  Passenger ID: ";
+    cin >> pid;
+    int pi = findP(pid);                    // Searches using getId()
+    // pid is compared using getter — can't access 'id' directly
+
+  STEP 3 — ABSTRACTION in action:
+    viewFlights();                          // Complex table display
+    // The programmer just calls ONE function
+    // Internally it loops, formats, and prints a table
+    // The caller doesn't need to know about setw, left, etc.
+
+  STEP 4 — INHERITANCE in action:
+    fBookings[fbCnt].input(nextBId, pid, passengers[pi].getName());
+    fBookings[fbCnt].setAirline(flights[fi].getAirline());   // OWN method
+    fBookings[fbCnt].setOrigin(flights[fi].getOrigin());     // OWN method
+    // setBId() and setPId() are INHERITED from Booking
+    // setAirline() and setOrigin() are FlightBooking's OWN
+
+  STEP 5 — POLYMORPHISM in action:
+    fBookings[fbCnt].display();            // Prints FLIGHT TICKET format
+    // If this were an upgrade booking instead:
+    uBookings[ubCnt].display();            // Would print UPGRADE RECEIPT
+
+  STEP 6 — ENCAPSULATION again:
+    flights[fi].bookSeat();                // Safely decrements seats
+    // Can't do flights[fi].availSeats-- (it's private!)
+
+  RESULT: A flight ticket is booked with ALL four OOP pillars working together!
+
+
+================================================================================
+8. SUMMARY TABLE
+================================================================================
+
+  ┌────────────────┬───────────────────────────┬──────────────────────────────┐
+  │ OOP Concept    │ How It's Implemented      │ Where in Code                │
+  ├────────────────┼───────────────────────────┼──────────────────────────────┤
+  │ ENCAPSULATION  │ private data members +    │ Passenger: private id, name  │
+  │                │ public getters/setters    │ Flight: private availSeats   │
+  │                │ with input validation     │ Seat: private price, avail   │
+  │                │                           │ Booking: protected bId, pId  │
+  ├────────────────┼───────────────────────────┼──────────────────────────────┤
+  │ ABSTRACTION    │ Simple public interfaces  │ bookSeat() hides seat logic  │
+  │                │ hiding complex logic      │ input() hides I/O details    │
+  │                │                           │ display() hides formatting   │
+  │                │                           │ findP()/findF() hide search  │
+  ├────────────────┼───────────────────────────┼──────────────────────────────┤
+  │ INHERITANCE    │ Base class Booking        │ Booking → FlightBooking      │
+  │                │ with derived classes      │ Booking → SeatUpgrade        │
+  │                │ using 'public Booking'    │ protected members inherited  │
+  │                │ Reuses: bId,pId,amount    │ type set in constructor      │
+  ├────────────────┼───────────────────────────┼──────────────────────────────┤
+  │ POLYMORPHISM   │ Method overriding:        │ Booking::display()           │
+  │                │ Same method name,         │ FlightBooking::display()     │
+  │                │ different behavior in     │ SeatUpgrade::display()       │
+  │                │ base vs derived classes   │ displayRow() in both derived │
+  └────────────────┴───────────────────────────┴──────────────────────────────┘
+
+
+================================================================================
+  FILES REFERENCE
+================================================================================
+
+  FlightManagement.cpp        — Phase 1: Basic Classes & Objects
+  FlightManagement_Phase2.cpp — Phase 2: Encapsulation (private, validation)
+  FlightManagement_Phase3.cpp — Phase 3: Arrays of Objects, CRUD, Menu
+  FlightManagement_Phase4.cpp — Phase 4: Inheritance (Booking hierarchy)
+  FlightManagement_Final.cpp  — Final: All OOP Concepts Combined
+  flight_data.h               — C header with 40 airports + 80 routes
+  skyway_raylib.c             — Raylib GUI (C-based desktop application)
+  index.html + app.js + styles.css — Web frontend (HTML/CSS/JS)
+
+================================================================================
+  END OF DOCUMENT
+  Prepared for: OODP Flight Management System Project
+================================================================================

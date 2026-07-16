@@ -1,0 +1,417 @@
+================================================================================
+    FLIGHT MANAGEMENT SYSTEM — COMPLETE CODE EXPLANATION
+    What is used, How it works, and Why
+================================================================================
+
+TABLE OF CONTENTS
+  1. Project Overview & File Structure
+  2. OOP Concepts Used (Encapsulation, Abstraction, Inheritance, Polymorphism)
+  3. Class-by-Class Explanation with Code Examples
+  4. How the Main Program Works
+  5. Web Frontend Explanation
+  6. Summary
+
+================================================================================
+1. PROJECT OVERVIEW & FILE STRUCTURE
+================================================================================
+
+This is a Flight Management System for Indian domestic airlines built using
+C++ (backend/console) and HTML/CSS/JS (web frontend).
+
+FILES:
+  FlightManagement.cpp         — Phase 1: Basic classes, public members
+  FlightManagement_Phase2.cpp  — Phase 2: Encapsulation added
+  FlightManagement_Phase3.cpp  — Phase 3: Arrays, CRUD, menu system
+  FlightManagement_Phase4.cpp  — Phase 4: Inheritance added
+  FlightManagement_Final.cpp   — FINAL: All OOP concepts combined (MAIN FILE)
+  flight_data.h                — Header file with 40 airports & 80 routes
+  skyway_raylib.c              — Desktop GUI using Raylib library
+  index.html + app.js + styles.css — Web application
+
+The FINAL version (FlightManagement_Final.cpp) is the main deliverable.
+It contains 6 classes and demonstrates all 4 OOP pillars.
+
+
+================================================================================
+2. OOP CONCEPTS — WHAT, HOW, AND WHY
+================================================================================
+
+--- ENCAPSULATION ---
+
+WHAT: Bundling data + methods in a class, hiding data using 'private'.
+HOW:  All class attributes are 'private'. Access only through getters/setters.
+WHY:  Prevents invalid data. Example: phone MUST be 10 digits. If phone were
+      public, anyone could write p.phone = "abc". With encapsulation, they must
+      call p.setPhone("abc") which REJECTS it because length != 10.
+
+CODE EXAMPLE (from Passenger class):
+
+  class Passenger {
+  private:                              // HIDDEN — cannot access directly
+      int id;
+      string name, phone, passport;
+
+  public:
+      int getId() { return id; }        // GETTER — read-only access
+
+      bool setPhone(string p) {         // SETTER — validates before setting
+          if (p.length() == 10) {       // Rule: must be exactly 10 digits
+              for (int i = 0; i < 10; i++)
+                  if (p[i] < '0' || p[i] > '9') {
+                      cout << "Digits only.\n";
+                      return false;
+                  }
+              phone = p;                // Only sets if valid
+              return true;
+          }
+          cout << "Must be 10 digits.\n";
+          return false;                 // Rejects invalid input
+      }
+  };
+
+  WHY THIS MATTERS:
+  Without encapsulation (Phase 1), we had: p.phone = "anything" — no checking.
+  With encapsulation (Phase 2+), invalid data is blocked at the door.
+
+--- ABSTRACTION ---
+
+WHAT: Hiding complex details, showing only a simple interface.
+HOW:  Public methods like bookSeat(), input(), display() hide all internal logic.
+WHY:  The programmer calling these methods doesn't need to know HOW they work.
+
+CODE EXAMPLE:
+
+  // The caller just writes ONE line:
+  flights[fi].bookSeat();
+
+  // But internally, bookSeat() does multiple things:
+  bool bookSeat() {
+      if (availSeats > 0) {       // 1. Checks if seats available
+          availSeats--;            // 2. Decrements the counter
+          return true;             // 3. Returns success
+      }
+      cout << "No seats.\n";      // 4. Shows error message
+      return false;                // 5. Returns failure
+  }
+
+  WHY: The booking function doesn't need to know about seat counting.
+  It just calls bookSeat() and checks true/false. Simple!
+
+--- INHERITANCE ---
+
+WHAT: A child class inherits attributes and methods from a parent class.
+HOW:  FlightBooking and SeatUpgrade both inherit from Booking using
+      "class FlightBooking : public Booking"
+WHY:  Both booking types need: bookingId, passengerId, date, amount.
+      Instead of writing these in BOTH classes, we write them ONCE in Booking
+      and both children INHERIT them. This is CODE REUSE.
+
+CODE EXAMPLE:
+
+  // BASE CLASS — common attributes for ALL bookings
+  class Booking {
+  protected:                     // 'protected' = accessible by children
+      int bId, pId;              // Booking ID, Passenger ID
+      string pName, date, type;  // Common to all bookings
+      float amount;
+  public:
+      void setBId(int i) { if (i > 0) bId = i; }
+      void setAmount(float a) { if (a >= 0) amount = a; }
+  };
+
+  // CHILD CLASS 1 — adds flight-specific data
+  class FlightBooking : public Booking {   // ← INHERITS from Booking
+  private:
+      string airline, origin, dest;        // Extra data for flights
+      int seatNum;
+  public:
+      FlightBooking() { type = "Flight"; } // Sets inherited 'type'
+      void setAirline(string a) { airline = a; }
+  };
+
+  // CHILD CLASS 2 — adds upgrade-specific data
+  class SeatUpgrade : public Booking {     // ← ALSO INHERITS from Booking
+  private:
+      string fromCls, toCls;               // Extra data for upgrades
+  public:
+      SeatUpgrade() { type = "Upgrade"; }
+  };
+
+  WHAT IS INHERITED: bId, pId, pName, date, type, amount + all their methods
+  WHAT IS ADDED: FlightBooking adds airline, route, seat; SeatUpgrade adds classes
+
+--- POLYMORPHISM ---
+
+WHAT: Same method name, different behavior depending on the object.
+HOW:  Both FlightBooking and SeatUpgrade override the display() method
+      from Booking with their own version.
+WHY:  A flight ticket and an upgrade receipt look COMPLETELY different,
+      but we can call .display() on both without caring about the type.
+
+CODE EXAMPLE:
+
+  // Booking base class display():
+  void display() {
+      cout << "Booking #" << bId << " | " << type << " | Rs." << amount;
+  }
+  // Output: "Booking #1001 | Flight | Rs.4500"
+
+  // FlightBooking OVERRIDES display():
+  void display() {
+      cout << "+--------------------------------------------+" << endl;
+      cout << "|            ** FLIGHT TICKET **             |" << endl;
+      cout << "| Booking ID  : " << bId << endl;      // inherited
+      cout << "| Airline     : " << airline << endl;   // own
+      cout << "| Route       : " << origin << " -> " << dest << endl;
+      cout << "| TOTAL       : Rs." << amount << endl; // inherited
+      cout << "+--------------------------------------------+" << endl;
+  }
+
+  // SeatUpgrade OVERRIDES display():
+  void display() {
+      cout << "+--------------------------------------------+" << endl;
+      cout << "|         ** SEAT UPGRADE RECEIPT **         |" << endl;
+      cout << "| Upgrade     : " << fromCls << " -> " << toCls << endl;
+      cout << "| FEE         : Rs." << amount << endl;
+      cout << "+--------------------------------------------+" << endl;
+  }
+
+  // In viewAllBookings(), SAME method name, DIFFERENT output:
+  fBookings[i].display();   // → prints FLIGHT TICKET format
+  uBookings[i].display();   // → prints UPGRADE RECEIPT format
+
+
+================================================================================
+3. CLASS-BY-CLASS EXPLANATION
+================================================================================
+
+--- CLASS: Passenger ---
+PURPOSE: Represents a traveler in the system.
+ATTRIBUTES (all private):
+  int id        — Unique identifier (must be > 0)
+  string name   — Full name (cannot be empty)
+  string phone  — Phone number (must be exactly 10 digits, digits only)
+  string passport — Passport number (must be 6-12 characters)
+
+KEY METHODS:
+  input()       — Prompts user for all details, calls setters for validation
+  display()     — Shows passenger in table row format
+  displayCard() — Shows passenger in a bordered card format
+  setPhone()    — Validates 10 digits before accepting
+  setPassport() — Validates 6-12 character length
+
+OOP USED: Encapsulation (private + validated setters), Abstraction (input/display)
+
+--- CLASS: Flight ---
+PURPOSE: Represents an airline flight.
+ATTRIBUTES (all private):
+  int id           — Flight ID (must be > 0)
+  int totalSeats   — Maximum seats on the aircraft
+  int availSeats   — Currently available seats
+  string airline   — Airline name (Air India, IndiGo, etc.)
+  string origin    — Departure city
+  string dest      — Arrival city
+  string depTime   — Departure time
+
+KEY METHODS:
+  bookSeat()    — Checks availability, decrements seats, returns true/false
+  cancelSeat()  — Increments seats back (but not beyond totalSeats)
+  setSeats(s)   — Validates range 0-500
+  display()     — Shows flight in table format with route and seat count
+
+OOP USED: Encapsulation (bookSeat logic is protected), Abstraction (simple API)
+
+--- CLASS: Seat ---
+PURPOSE: Represents an individual seat on an aircraft.
+ATTRIBUTES (all private):
+  int no        — Seat number
+  string cls    — Class: "Economy", "Business", or "First" (validated)
+  float price   — Ticket price (must be > 0)
+  bool avail    — Whether the seat is currently available
+
+KEY METHODS:
+  setCls(c)     — Only accepts "Economy"/"Business"/"First", rejects others
+  markBooked()  — Sets avail=false ONLY if currently available (prevents double-booking)
+  markAvail()   — Releases the seat
+  display()     — Shows seat in table format with status
+
+OOP USED: Encapsulation (state protection), Abstraction (simple book/release)
+
+--- CLASS: Booking (BASE CLASS) ---
+PURPOSE: Common foundation for all booking types. NOT used directly.
+ATTRIBUTES (protected — accessible by child classes):
+  int bId       — Booking ID (auto-generated starting from 1001)
+  int pId       — Passenger ID (links to Passenger)
+  string pName  — Passenger name (stored for display)
+  string date   — Booking date
+  string type   — "Flight" or "Upgrade" (set by child constructor)
+  float amount  — Total price
+
+WHY PROTECTED (not private)?
+  Protected members are accessible by derived classes (FlightBooking, SeatUpgrade)
+  but NOT by outside code. This is the key to inheritance working properly.
+
+OOP USED: Inheritance (serves as base), Encapsulation (protected access)
+
+--- CLASS: FlightBooking (DERIVED from Booking) ---
+PURPOSE: Represents a flight ticket booking.
+INHERITS: bId, pId, pName, date, type, amount from Booking
+OWN ATTRIBUTES:
+  string airline, origin, dest, depTime — Flight details
+  int seatNum, flightId                 — Assigned seat and flight
+
+KEY METHODS:
+  input(b,p,nm)  — Takes booking ID, passenger ID, name; prompts for date/seat/price
+  display()      — OVERRIDES Booking::display() → prints a bordered flight ticket
+  displayRow()   — Shows booking as a table row (for the booking list view)
+
+OOP USED: Inheritance (reuses Booking), Polymorphism (overrides display())
+
+--- CLASS: SeatUpgrade (DERIVED from Booking) ---
+PURPOSE: Represents a seat class upgrade booking.
+INHERITS: bId, pId, pName, date, type, amount from Booking
+OWN ATTRIBUTES:
+  int seatNo, flightId      — Which seat/flight to upgrade
+  string fromCls, toCls     — e.g., "Economy" → "Business"
+
+KEY METHODS:
+  input(b,p,nm) — Prompts for flight, seat, classes, upgrade fee
+  display()     — OVERRIDES Booking::display() → prints an upgrade receipt
+  displayRow()  — Shows upgrade as a table row
+
+OOP USED: Inheritance (reuses Booking), Polymorphism (overrides display())
+
+
+================================================================================
+4. HOW THE MAIN PROGRAM WORKS
+================================================================================
+
+GLOBAL DATA STORAGE:
+  Passenger passengers[50]  — Array of up to 50 passengers
+  Flight flights[50]        — Array of up to 50 flights
+  Seat seats[50]            — Array of up to 50 seats
+  FlightBooking fBookings[50] — Array of flight bookings
+  SeatUpgrade uBookings[50]   — Array of upgrade bookings
+  int pCnt, fCnt, sCnt, fbCnt, ubCnt — Counters for each array
+  int nextBId = 1001        — Auto-incrementing booking ID
+
+HELPER FUNCTIONS:
+  findP(id) — Searches passengers array, returns index or -1
+  findF(id) — Searches flights array, returns index or -1
+  findS(no) — Searches seats array, returns index or -1
+  pLine()   — Prints a dashed line for table formatting
+  dLine()   — Prints a double line (=====) for section headers
+
+MENU SYSTEM (main function):
+  Uses a do-while loop with switch-case:
+    1. Add Passenger      → addPassenger()
+    2. View Passengers    → viewPassengers()
+    3. Search Passenger   → searchPassenger() — also shows booking count
+    4. Delete Passenger   → deletePassenger() — blocks if has active bookings
+    5. Add Flight         → addFlight()
+    6. View Flights       → viewFlights()
+    7. Add Seat           → addSeat()
+    8. View Seats         → viewSeats()
+    9. Available Seats    → viewAvailSeats()
+    10. Book Flight       → bookFlight() — full booking flow
+    11. Cancel Flight     → cancelFlight() — also restores seat count
+    12. Book Upgrade      → bookUpgrade()
+    13. Cancel Upgrade    → cancelUpgrade()
+    14. View All Bookings → viewAllBookings() — shows revenue summary
+    0. Exit
+
+BOOKING FLOW (bookFlight):
+  Step 1: Ask for passenger ID → find using findP()
+  Step 2: Display all flights using viewFlights()
+  Step 3: Ask for flight ID → find using findF()
+  Step 4: Check if seats available (getAvailSeats() > 0)
+  Step 5: Call fBookings[fbCnt].input() to get date/seat/price
+  Step 6: Copy flight details (airline, origin, dest) to booking
+  Step 7: Call flights[fi].bookSeat() to decrement seats
+  Step 8: Display the ticket using fBookings[fbCnt].display()
+  Step 9: Increment booking counter and booking ID
+
+CANCELLATION FLOW:
+  Step 1: Ask for booking ID
+  Step 2: Search the bookings array
+  Step 3: Display the booking being cancelled
+  Step 4: Restore the seat (flights[fi].cancelSeat())
+  Step 5: Shift array elements left to remove the booking
+  Step 6: Decrement counter
+
+DELETE PROTECTION:
+  deletePassenger() checks if the passenger has active flight bookings.
+  If they do, deletion is BLOCKED — you must cancel bookings first.
+  This protects data integrity.
+
+
+================================================================================
+5. WEB FRONTEND EXPLANATION (index.html + app.js + styles.css)
+================================================================================
+
+The web version is a STANDALONE application (no server needed, runs in browser).
+
+--- index.html ---
+  Structure: Single-page app with 3 sections (tabs):
+    1. Search Flights — Hero banner + search form + results area
+    2. Manage — Add/view passengers and flights
+    3. My Bookings — Book flights and view booking history
+  Navigation: Tab-based using onclick="show('search')" etc.
+  Theme: Dark mode by default, toggle with moon/sun button
+
+--- app.js ---
+  AIRPORTS array: 30 Indian cities with IATA codes and tier levels (1/2/3)
+  AIRLINES array: 6 airlines (Air India, IndiGo, SpiceJet, Vistara, Akasa, GoFirst)
+  ROUTE_INFO: 80+ routes with price multipliers and flight durations
+
+  generateFlights(): Algorithmically creates 1500+ flights by combining:
+    - All city pairs × airlines × time slots
+    - Tier-based coverage (metro routes get more flights)
+    - Price = airline base × route multiplier ± variation
+
+  SMART SEARCH (searchFlights):
+    Tier 1: Exact match (±15 min from preferred time)
+    Tier 2: Window match (±3 hours)
+    Tier 3: Same day (all available)
+    Guarantees 4+ results with airline diversity
+
+  CONNECTING FLIGHTS (findConnectingFlights):
+    Routes through 6 hub cities (DEL, BOM, BLR, MAA, CCU, HYD)
+    Requires 2-6 hour layover between legs
+
+  BOOKING: quickBook() adds flight to managed flights + navigates to booking page
+  Auto seat assignment based on seat number (1-12 Business, 13-36 Premium, 37+ Economy)
+
+--- styles.css ---
+  CSS Variables for theming (light/dark mode)
+  Glassmorphism effects (backdrop-filter, semi-transparent backgrounds)
+  Smooth transitions and hover animations
+  Responsive grid layouts for search form and result cards
+  Color-coded badges for search tier results
+
+
+================================================================================
+6. SUMMARY
+================================================================================
+
+ENCAPSULATION is used in EVERY class:
+  → private attributes + public getters/setters with validation
+  → Protects data integrity (invalid phone, negative seats, etc.)
+
+ABSTRACTION is used through public methods:
+  → bookSeat(), input(), display() hide complex logic
+  → Callers don't need to know implementation details
+
+INHERITANCE is used in the Booking hierarchy:
+  → Booking (base) → FlightBooking (child) + SeatUpgrade (child)
+  → 6 common attributes are written ONCE and inherited by both
+  → Saves code, improves maintainability
+
+POLYMORPHISM is used through method overriding:
+  → display() behaves differently in Booking vs FlightBooking vs SeatUpgrade
+  → displayRow() also has different implementations in each child class
+  → Same interface, different behavior based on object type
+
+================================================================================
+  END OF DOCUMENT
+================================================================================

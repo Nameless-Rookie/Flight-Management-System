@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkyWay - Flight Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark">
+<nav>
+  <div class="nav-inner">
+    <div class="logo">✈️ <span>Sky<b>Way</b></span></div>
+    <div class="nav-links">
+      <a onclick="show('search')" class="nav-a active" id="nav-search">Search Flights</a>
+      <a onclick="show('manage')" class="nav-a" id="nav-manage">Manage</a>
+      <a onclick="show('bookings')" class="nav-a" id="nav-bookings">My Bookings</a>
+    </div>
+    <div class="nav-right">
+      <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+        <div class="toggle-track"><div class="toggle-thumb" id="toggleThumb">🌙</div></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO SEARCH -->
+<div id="sec-search" class="section active">
+<div class="hero">
+  <h1>Hi there, plan your journey with ease</h1>
+  <p class="hero-sub">Search, compare & book flights instantly</p>
+</div>
+<div class="search-card">
+  <div class="search-tabs">
+    <button class="stab active">✈️ Flights</button>
+  </div>
+  <div class="search-grid" style="grid-template-columns:1fr 1fr .8fr .7fr .8fr auto;">
+    <div class="sg"><label>From</label>
+      <select id="s-origin"><option value="">Select Origin</option><option>Delhi</option><option>Mumbai</option><option>Bangalore</option><option>Chennai</option><option>Kolkata</option><option>Hyderabad</option><option>Pune</option><option>Jaipur</option><option>Goa</option><option>Ahmedabad</option><option>Kochi</option><option>Lucknow</option><option>Chandigarh</option><option>Indore</option><option>Varanasi</option><option>Patna</option><option>Bhubaneswar</option><option>Nagpur</option><option>Amritsar</option><option>Srinagar</option><option>Ranchi</option><option>Raipur</option><option>Coimbatore</option><option>Trivandrum</option><option>Mangaluru</option><option>Udaipur</option><option>Dehradun</option><option>Vizag</option><option>Madurai</option><option>Jodhpur</option></select></div>
+    <div class="sg"><label>To</label>
+      <select id="s-dest"><option value="">Select Destination</option><option>Delhi</option><option>Mumbai</option><option>Bangalore</option><option>Chennai</option><option>Kolkata</option><option>Hyderabad</option><option>Pune</option><option>Jaipur</option><option>Goa</option><option>Ahmedabad</option><option>Kochi</option><option>Lucknow</option><option>Chandigarh</option><option>Indore</option><option>Varanasi</option><option>Patna</option><option>Bhubaneswar</option><option>Nagpur</option><option>Amritsar</option><option>Srinagar</option><option>Ranchi</option><option>Raipur</option><option>Coimbatore</option><option>Trivandrum</option><option>Mangaluru</option><option>Udaipur</option><option>Dehradun</option><option>Vizag</option><option>Madurai</option><option>Jodhpur</option></select></div>
+    <div class="sg"><label>Travel Date</label>
+      <input type="date" id="s-date" value=""></div>
+    <div class="sg"><label>Preferred Time (24h)</label>
+      <input type="time" id="s-time" value="14:00"></div>
+    <div class="sg"><label>Airline Preference</label>
+      <select id="s-airline"><option value="">Browse All</option><option>Air India</option><option>IndiGo</option><option>SpiceJet</option><option>Vistara</option><option>GoFirst</option><option>Akasa Air</option></select></div>
+    <button class="search-btn" onclick="searchFlights()">🔍 Search</button>
+  </div>
+  <p class="search-hint">Smart search: exact match → ±3 hours → closest available • Min 4 results with airline diversity</p>
+</div>
+<div id="date-prompt" class="results-area" style="display:none;"></div>
+
+<div id="results" class="results-area"></div>
+
+<!-- OFFERS -->
+<div class="offers-section">
+  <h2>Find <em>exciting offers</em> and best deals</h2>
+  <div class="offers-row">
+    <div class="offer-card" style="background:linear-gradient(135deg,#667eea,#764ba2)">
+      <h3>Early Bird</h3><p>Book 30 days early, save up to ₹2000</p>
+    </div>
+    <div class="offer-card" style="background:linear-gradient(135deg,#f093fb,#f5576c)">
+      <h3>Weekend Sale</h3><p>Flat 15% off on weekend departures</p>
+    </div>
+    <div class="offer-card" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">
+      <h3>Business Class</h3><p>Upgrade to Business at Economy prices</p>
+    </div>
+    <div class="offer-card" style="background:linear-gradient(135deg,#43e97b,#38f9d7)">
+      <h3>Student Offer</h3><p>Extra 10% off with valid student ID</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- MANAGE SECTION -->
+<div id="sec-manage" class="section">
+<div class="container">
+  <div class="manage-tabs">
+    <button class="mtab active" onclick="showManage('passenger')">👤 Passengers</button>
+    <button class="mtab" onclick="showManage('flight')">🛫 Flights</button>
+  </div>
+  <div id="man-passenger" class="man active">
+    <div class="card"><h2>👤 Add Passenger</h2>
+    <div class="form-grid">
+      <div class="fg"><label>Passenger ID</label><input type="number" id="pid" placeholder="e.g. 101"></div>
+      <div class="fg"><label>Passport No</label><input type="text" id="ppass" placeholder="e.g. A12345678"></div>
+      <div class="fg"><label>Full Name</label><input type="text" id="pname" placeholder="e.g. John Doe"></div>
+      <div class="fg"><label>Phone</label><input type="text" id="pphone" placeholder="+91 9876543210"></div>
+    </div>
+    <div class="btn-row"><button class="btn-p" onclick="addPassenger()">+ Add Passenger</button></div>
+    </div>
+    <div class="card"><h2>📋 All Passengers</h2><div id="ptable"></div></div>
+  </div>
+  <div id="man-flight" class="man">
+    <div class="card"><h2>🛫 Add Flight</h2>
+    <div class="form-grid">
+      <div class="fg"><label>Flight ID</label><input type="number" id="fid" placeholder="e.g. 501"></div>
+      <div class="fg"><label>Airline</label><input type="text" id="fairline" placeholder="e.g. Air India"></div>
+      <div class="fg"><label>Origin</label><input type="text" id="forigin" placeholder="e.g. Mumbai"></div>
+      <div class="fg"><label>Destination</label><input type="text" id="fdest" placeholder="e.g. Delhi"></div>
+      <div class="fg"><label>Departure (24h)</label><input type="time" id="ftime"></div>
+      <div class="fg"><label>Seats</label><input type="number" id="fseats" placeholder="e.g. 180"></div>
+    </div>
+    <div class="btn-row"><button class="btn-p" onclick="addFlight()">+ Add Flight</button></div>
+    </div>
+    <div class="card"><h2>📋 All Flights</h2><div id="ftable"></div></div>
+  </div>
+</div>
+</div>
+
+<!-- BOOKINGS SECTION -->
+<div id="sec-bookings" class="section">
+<div class="container">
+  <div class="card"><h2>🎫 Book a Flight</h2>
+  <div class="form-grid">
+    <div class="fg"><label>Passenger ID</label><input type="number" id="bpid" placeholder="Passenger ID"></div>
+    <div class="fg"><label>Flight No</label><input type="text" id="bfno" placeholder="Flight Number"></div>
+  </div>
+  <p style="margin-top:10px;font-size:.8rem;color:var(--text2)">💺 A seat will be automatically assigned to you upon booking.</p>
+  <div class="btn-row"><button class="btn-p" onclick="bookFlight()">✈️ Confirm Booking</button></div>
+  </div>
+  <div class="card"><h2>📋 All Bookings</h2><div id="btable"></div></div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
